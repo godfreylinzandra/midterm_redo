@@ -58,6 +58,24 @@ app.post("/api/logout", (req, res) => {
     res.json({ ok: true });
   });
 });
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Serve frontend HTML pages
+app.get("/:page", (req, res) => {
+  const page = req.params.page;
+  const allowedPages = ["auth.html", "budget_plan.html"];
+  
+  if (allowedPages.includes(page)) {
+    res.sendFile(path.join(__dirname, "public", page));
+  } else {
+    // fallback to auth.html for unknown routes
+    res.sendFile(path.join(__dirname, "public", "auth.html"));
+  }
+});
 
 // Start server
 const PORT = process.env.PORT || 3000;
