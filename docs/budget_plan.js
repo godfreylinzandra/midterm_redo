@@ -2,6 +2,7 @@ window.onload = async function () {
   // -------------------------------
   // Constants & Variables
   // -------------------------------
+  const BASE_URL = "https://your-app.onrender.com"; // <-- replace with your Render app URL
   const categories = {
     Income: ["Salary", "Allowance", "Freelance", "Gift"],
     Expense: ["Food", "Transport", "Rent", "School Supplies", "Miscellaneous"]
@@ -59,7 +60,7 @@ window.onload = async function () {
   // -------------------------------
   async function loadUser() {
     try {
-      const res = await fetch("/api/session");
+      const res = await fetch(`${BASE_URL}/api/session`, { credentials: "include" });
       if (res.status === 401) return window.location.href = "/index.html";
       const data = await res.json();
       userEmailUI.textContent = " " + data.email;
@@ -72,7 +73,7 @@ window.onload = async function () {
   userId = await loadUser();
 
   logoutBtn.addEventListener("click", async () => {
-    await fetch("/api/logout", { method: "POST" });
+    await fetch(`${BASE_URL}/api/logout`, { method: "POST", credentials: "include" });
     window.location.href = "/index.html";
   });
 
@@ -81,7 +82,7 @@ window.onload = async function () {
   // -------------------------------
   async function loadBudget() {
     try {
-      const res = await fetch("/api/budget");
+      const res = await fetch(`${BASE_URL}/api/budget`, { credentials: "include" });
       if (!res.ok) throw new Error("Failed to fetch budget");
       budget = await res.json();
       updateBudgetDisplay();
@@ -95,7 +96,7 @@ window.onload = async function () {
 
   async function loadTransactions() {
     try {
-      const res = await fetch("/api/transactions");
+      const res = await fetch(`${BASE_URL}/api/transactions`, { credentials: "include" });
       if (!res.ok) throw new Error("Failed to fetch transactions");
       transactions = await res.json();
       renderTransactions();
@@ -139,7 +140,6 @@ window.onload = async function () {
       return;
     }
 
-    // Confirmation logic like code1
     if (budget && budget.amount > 0) {
       const updateConfirmed = confirm("Update existing budget?");
       if (updateConfirmed) {
@@ -157,10 +157,11 @@ window.onload = async function () {
     budget.type = type;
 
     try {
-      const res = await fetch("/api/budget", {
+      const res = await fetch(`${BASE_URL}/api/budget`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(budget)
+        body: JSON.stringify(budget),
+        credentials: "include"
       });
       if (!res.ok) throw new Error("Failed to save budget");
       updateBudgetDisplay();
@@ -176,57 +177,55 @@ window.onload = async function () {
   // -------------------------------
   // Transaction Form
   // -------------------------------
-transactionForm.addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const amount = parseFloat(document.getElementById("amount").value);
-  const type = typeSelect.value;
-  const category = categorySelect.value;
-  const note = document.getElementById("note").value;
-  const dateInput = document.getElementById("date").value;
-  const isoDate = dateInput ? new Date(dateInput).toISOString() : new Date().toISOString();
+  transactionForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const amount = parseFloat(document.getElementById("amount").value);
+    const type = typeSelect.value;
+    const category = categorySelect.value;
+    const note = document.getElementById("note").value;
+    const dateInput = document.getElementById("date").value;
+    const isoDate = dateInput ? new Date(dateInput).toISOString() : new Date().toISOString();
 
-  const transactionData = { amount, type, category, note, date: isoDate }; // ❌ photos removed
+    const transactionData = { amount, type, category, note, date: isoDate };
 
-  try {
-    const res = await fetch("/api/transactions", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(transactionData)
-    });
-    if (!res.ok) throw new Error("Failed to save transaction");
-    await loadTransactions();
-    transactionForm.reset();
-    document.getElementById("transaction-table").scrollIntoView({ behavior: "smooth" });
-    alert("✅ Transaction saved!");
-  } catch (err) {
-    console.error(err);
-    alert("Error saving transaction");
-  }
-});
-
+    try {
+      const res = await fetch(`${BASE_URL}/api/transactions`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(transactionData),
+        credentials: "include"
+      });
+      if (!res.ok) throw new Error("Failed to save transaction");
+      await loadTransactions();
+      transactionForm.reset();
+      document.getElementById("transaction-table").scrollIntoView({ behavior: "smooth" });
+      alert("✅ Transaction saved!");
+    } catch (err) {
+      console.error(err);
+      alert("Error saving transaction");
+    }
+  });
 
   // -------------------------------
   // Render Transactions
   // -------------------------------
-function renderTransactions() {
-  transactionTable.innerHTML = "";
-  transactions.forEach((t) => {
-    const displayDate = t.date
-      ? new Date(t.date).toLocaleString("en-PH", { year:"numeric", month:"2-digit", day:"2-digit", hour:"2-digit", minute:"2-digit" })
-      : "";
+  function renderTransactions() {
+    transactionTable.innerHTML = "";
+    transactions.forEach((t) => {
+      const displayDate = t.date
+        ? new Date(t.date).toLocaleString("en-PH", { year:"numeric", month:"2-digit", day:"2-digit", hour:"2-digit", minute:"2-digit" })
+        : "";
 
-    const row = document.createElement("tr");
-    row.innerHTML = `
-      <td>${displayDate}</td>
-      <td>${t.type}</td>
-      <td>${t.category}</td>
-      <td>₱${t.amount}</td>
-      <td>${t.note}</td>  <!-- photos removed -->
-    `;
-    transactionTable.appendChild(row);
-  });
-
-
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${displayDate}</td>
+        <td>${t.type}</td>
+        <td>${t.category}</td>
+        <td>₱${t.amount}</td>
+        <td>${t.note}</td>
+      `;
+      transactionTable.appendChild(row);
+    });
   }
 
   // -------------------------------
