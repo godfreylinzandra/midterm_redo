@@ -60,20 +60,20 @@ window.onload = async function () {
   async function loadUser() {
     try {
       const res = await fetch("/api/session");
-      if (res.status === 401) return window.location.href = "/auth.html";
+      if (res.status === 401) return window.location.href = "/index.html";
       const data = await res.json();
       userEmailUI.textContent = " " + data.email;
       return data.userId;
     } catch (err) {
       console.error(err);
-      window.location.href = "/auth.html";
+      window.location.href = "/index.html";
     }
   }
   userId = await loadUser();
 
   logoutBtn.addEventListener("click", async () => {
     await fetch("/api/logout", { method: "POST" });
-    window.location.href = "/auth.html";
+    window.location.href = "/index.html";
   });
 
   // -------------------------------
