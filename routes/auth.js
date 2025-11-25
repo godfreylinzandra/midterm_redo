@@ -37,14 +37,21 @@ router.post("/login", async (req, res) => {
   if (!email || !password) return res.status(400).json({ message: "Email & password required" });
 
   try {
+    // Temporary debug logs — remove or lower in production
+    console.log('[AUTH] /login called — Origin:', req.get('origin'));
+    console.log('[AUTH] body:', { email: req.body.email ? '***REDACTED***' : null });
+
     const result = await req.db.query("SELECT * FROM users WHERE email=$1", [email]);
     const user = result.rows[0];
+    console.log('[AUTH] user found:', !!user);
     if (!user) return res.status(400).json({ message: "Invalid credentials" });
 
     const match = await bcrypt.compare(password, user.password);
+    console.log('[AUTH] password match:', match);
     if (!match) return res.status(400).json({ message: "Invalid credentials" });
 
     req.session.userId = user.id;
+    console.log('[AUTH] session set for user id:', user.id);
     res.json({ ok: true, user: { id: user.id, name: user.name, email: user.email } });
   } catch (err) {
     console.error(err);

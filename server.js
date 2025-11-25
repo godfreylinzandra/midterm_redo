@@ -32,10 +32,14 @@ app.use(express.json());
 // -------------------------------
 // CORS
 // -------------------------------
-app.use(cors({
-  origin: "https://godfreylinzandra.github.io", // frontend
-  credentials: true
-}));
+// CORS: allow the frontend origin (set FRONTEND_ORIGIN in deploy) or reflect origin in non-prod
+const frontendOrigin = process.env.FRONTEND_ORIGIN || null;
+app.use(
+  cors({
+    origin: frontendOrigin ? frontendOrigin : true, // when null -> reflect request origin
+    credentials: true,
+  })
+);
 
 // -------------------------------
 // Session

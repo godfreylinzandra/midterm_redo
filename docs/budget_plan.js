@@ -2,7 +2,8 @@ window.onload = async function () {
   // -------------------------------
   // Constants & Variables
   // -------------------------------
-  const BASE_URL = "https://your-app.onrender.com"; // <-- replace with your Render app URL
+  // Use the same origin the page was served from so relative API calls work after deploy
+  const BASE_URL = window.location.origin;
   const categories = {
     Income: ["Salary", "Allowance", "Freelance", "Gift"],
     Expense: ["Food", "Transport", "Rent", "School Supplies", "Miscellaneous"]
@@ -60,7 +61,7 @@ window.onload = async function () {
   // -------------------------------
   async function loadUser() {
     try {
-      const res = await fetch(`${BASE_URL}/api/session`, { credentials: "include" });
+      const res = await fetch(`${BASE_URL}/auth/me`, { credentials: "include" });
       if (res.status === 401) return window.location.href = "/index.html";
       const data = await res.json();
       userEmailUI.textContent = " " + data.email;
@@ -73,7 +74,7 @@ window.onload = async function () {
   userId = await loadUser();
 
   logoutBtn.addEventListener("click", async () => {
-    await fetch(`${BASE_URL}/api/logout`, { method: "POST", credentials: "include" });
+    await fetch(`${BASE_URL}/auth/logout`, { method: "POST", credentials: "include" });
     window.location.href = "/index.html";
   });
 
@@ -82,7 +83,7 @@ window.onload = async function () {
   // -------------------------------
   async function loadBudget() {
     try {
-      const res = await fetch(`${BASE_URL}/api/budget`, { credentials: "include" });
+  const res = await fetch(`${BASE_URL}/api/budget`, { credentials: "include" });
       if (!res.ok) throw new Error("Failed to fetch budget");
       budget = await res.json();
       updateBudgetDisplay();
@@ -96,7 +97,7 @@ window.onload = async function () {
 
   async function loadTransactions() {
     try {
-      const res = await fetch(`${BASE_URL}/api/transactions`, { credentials: "include" });
+  const res = await fetch(`${BASE_URL}/api/transactions`, { credentials: "include" });
       if (!res.ok) throw new Error("Failed to fetch transactions");
       transactions = await res.json();
       renderTransactions();
@@ -160,8 +161,8 @@ window.onload = async function () {
       const res = await fetch(`${BASE_URL}/api/budget`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify(budget),
-        credentials: "include"
       });
       if (!res.ok) throw new Error("Failed to save budget");
       updateBudgetDisplay();
@@ -192,8 +193,8 @@ window.onload = async function () {
       const res = await fetch(`${BASE_URL}/api/transactions`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify(transactionData),
-        credentials: "include"
       });
       if (!res.ok) throw new Error("Failed to save transaction");
       await loadTransactions();

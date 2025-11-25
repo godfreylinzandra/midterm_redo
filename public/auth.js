@@ -1,5 +1,9 @@
 // ===== auth.js =====
 
+// If your frontend is hosted separately from the backend, set API_BASE to your backend URL.
+// Replace with your backend Render URL if different.
+const API_BASE = "https://midterm-redo.onrender.com";
+
 // ---- Elements ----
 const loginForm = document.getElementById("loginForm");
 const loginEmailEl = document.getElementById("loginEmail");
@@ -68,15 +72,16 @@ registerForm.addEventListener("submit", async (e) => {
   }
 
   try {
-    const res = await fetch("http://localhost:3000/auth/register", {
+    const res = await fetch(`${API_BASE}/auth/register`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
+      credentials: 'include',
       body: JSON.stringify({ name, email, address, password })
     });
 
     const data = await res.json();
     if (!res.ok) {
-      alert("❌ " + (data.error || "Registration failed"));
+      alert("❌ " + (data.message || "Registration failed"));
       return;
     }
 
@@ -101,15 +106,16 @@ loginForm.addEventListener("submit", async (e) => {
   }
 
   try {
-    const res = await fetch("http://localhost:3000/auth/login", {
+    const res = await fetch(`${API_BASE}/auth/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
+      credentials: 'include',
       body: JSON.stringify({ email, password })
     });
 
     const data = await res.json();
     if (!res.ok) {
-      alert("❌ " + (data.error || "Login failed"));
+      alert("❌ " + (data.message || "Login failed"));
       return;
     }
 
