@@ -71,14 +71,12 @@ app.use("/api", budgetRoutes);
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Serve frontend static files
 app.use(express.static(path.join(__dirname, "public")));
 
 // SPA fallback (catch-all)
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+app.use((req, res) => {
+  res.sendFile(path.join(__dirname, "public", "index.html"));
 });
-
 
 
 
